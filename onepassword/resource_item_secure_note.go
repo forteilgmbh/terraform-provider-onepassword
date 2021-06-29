@@ -39,9 +39,10 @@ func resourceItemSecureNote() *schema.Resource {
 				ForceNew: true,
 			},
 			"notes": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
+				Sensitive: true,
 			},
 			"section": {
 				Type:     schema.TypeList,
