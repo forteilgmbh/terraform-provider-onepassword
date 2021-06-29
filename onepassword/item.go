@@ -290,7 +290,10 @@ func (o *OnePassClient) CreateDocument(v *Item, filePath string) error {
 		DocumentResource,
 		filePath,
 		fmt.Sprintf("--title=%s", v.Overview.Title),
-		fmt.Sprintf("--tags=%s", strings.Join(v.Overview.Tags, ",")),
+	}
+
+	if len(v.Overview.Tags) > 0 {
+		args = append(args, fmt.Sprintf("--tags=%s", strings.Join(v.Overview.Tags, ",")))
 	}
 
 	if v.Vault != "" {
