@@ -44,9 +44,10 @@ func resourceItemDocument() *schema.Resource {
 				Required: true,
 			},
 			"content": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
