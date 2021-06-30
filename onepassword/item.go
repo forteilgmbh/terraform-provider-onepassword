@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -138,12 +139,23 @@ func (o *OnePassClient) ReadItem(id string, vaultID string) (*Item, error) {
 	}
 	res, err := o.runCmd(args...)
 	if err != nil {
+		if itemNotFound(string(res), err) {
+			return nil, nil
+		}
 		return nil, prettyError(args, res, err)
 	}
 	if err = json.Unmarshal(res, item); err != nil {
 		return nil, err
 	}
 	return item, nil
+}
+
+func itemNotFound(res string, err error) bool {
+	if exitError, ok := err.(*exec.ExitError); ok {
+		return (exitError.ExitCode() == 1 && strings.Contains(res, "isn't an item in")) ||
+			(exitError.ExitCode() == 4 && strings.Contains(res, "The requested resource was not found"))
+	}
+	return false
 }
 
 func Category2Template(c Category) string {

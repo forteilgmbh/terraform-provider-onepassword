@@ -3,6 +3,7 @@ package onepassword
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -71,6 +72,11 @@ func resourceItemPasswordRead(ctx context.Context, d *schema.ResourceData, meta 
 	v, err := m.onePassClient.ReadItem(getID(d), vaultID)
 	if err != nil {
 		diag.FromErr(err)
+	}
+	if v == nil {
+		log.Printf("[INFO] Item %s not found in %s vault", getID(d), vaultID)
+		d.SetId("")
+		return nil
 	}
 	if v.Template != Category2Template(PasswordCategory) {
 		diag.FromErr(errors.New("item is not from " + string(PasswordCategory)))
