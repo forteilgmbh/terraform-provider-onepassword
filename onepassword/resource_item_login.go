@@ -67,6 +67,12 @@ func resourceItemLogin() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: urlValidateDiag(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -118,6 +124,9 @@ func resourceItemLoginRead(ctx context.Context, d *schema.ResourceData, meta int
 	if err := d.Set("section", ProcessSections(v.Details.Sections)); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -155,5 +164,5 @@ func resourceItemLoginCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemLoginRead(ctx, d, meta)
 }

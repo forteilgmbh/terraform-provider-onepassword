@@ -68,6 +68,12 @@ func resourceItemCommon() *schema.Resource {
 				ForceNew: true,
 				Elem:     sectionSchema(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -104,6 +110,9 @@ func resourceItemCommonRead(ctx context.Context, d *schema.ResourceData, meta in
 	if err := d.Set("section", ProcessSections(v.Details.Sections)); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -126,5 +135,5 @@ func resourceItemCommonCreate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemCommonRead(ctx, d, meta)
 }

@@ -110,6 +110,12 @@ func resourceItemCreditCard() *schema.Resource {
 				ForceNew: true,
 				Elem:     sectionSchema(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -158,6 +164,9 @@ func resourceItemCreditCardRead(ctx context.Context, d *schema.ResourceData, met
 		},
 	}); err != nil {
 		return diag.FromErr(err)
+	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
 	}
 	return nil
 }
@@ -258,5 +267,5 @@ func resourceItemCreditCardCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemCreditCardRead(ctx, d, meta)
 }

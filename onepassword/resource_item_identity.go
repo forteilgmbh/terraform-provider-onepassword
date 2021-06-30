@@ -182,6 +182,12 @@ func resourceItemIdentity() *schema.Resource {
 				ForceNew: true,
 				Elem:     sectionSchema(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -252,6 +258,9 @@ func resourceItemIdentityRead(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}); err != nil {
 		return diag.FromErr(err)
+	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
 	}
 	return nil
 }
@@ -474,5 +483,5 @@ func resourceItemIdentityCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemIdentityRead(ctx, d, meta)
 }

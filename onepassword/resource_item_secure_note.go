@@ -51,6 +51,12 @@ func resourceItemSecureNote() *schema.Resource {
 				ForceNew: true,
 				Elem:     sectionSchema(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -87,6 +93,9 @@ func resourceItemSecureNoteRead(ctx context.Context, d *schema.ResourceData, met
 	if err := d.Set("section", ProcessSections(v.Details.Sections)); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -109,5 +118,5 @@ func resourceItemSecureNoteCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemSecureNoteRead(ctx, d, meta)
 }

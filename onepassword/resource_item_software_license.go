@@ -71,6 +71,12 @@ func resourceItemSoftwareLicense() *schema.Resource {
 				ForceNew: true,
 				Elem:     sectionSchema(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -115,6 +121,9 @@ func resourceItemSoftwareLicenseRead(ctx context.Context, d *schema.ResourceData
 	}); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -158,5 +167,5 @@ func resourceItemSoftwareLicenseCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemSoftwareLicenseRead(ctx, d, meta)
 }

@@ -61,6 +61,8 @@ const (
 	TypeReference SectionFieldType = "reference"
 )
 
+const IsTrashed = "Y"
+
 type Address struct {
 	City    string `json:"city"`
 	Country string `json:"country"`
@@ -76,6 +78,7 @@ type Item struct {
 	Vault    string   `json:"vaultUUID"`
 	Overview Overview `json:"overview"`
 	Details  Details  `json:"details"`
+	Trashed  string   `json:"trashed"`
 }
 
 type Details struct {

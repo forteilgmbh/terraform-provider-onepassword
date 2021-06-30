@@ -62,6 +62,12 @@ func resourceItemPassword() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: urlValidateDiag(),
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -104,6 +110,9 @@ func resourceItemPasswordRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("section", ProcessSections(v.Details.Sections)); err != nil {
 		diag.FromErr(err)
 	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -128,5 +137,5 @@ func resourceItemPasswordCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	d.SetId(item.UUID)
-	return nil
+	return resourceItemPasswordRead(ctx, d, meta)
 }

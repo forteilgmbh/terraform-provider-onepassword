@@ -50,6 +50,12 @@ func resourceItemDocument() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"archived": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -89,6 +95,9 @@ func resourceItemDocumentRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("content", content); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
+		diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -115,5 +124,5 @@ func resourceItemDocumentCreate(ctx context.Context, d *schema.ResourceData, met
 	if err := d.Set("content", content); err != nil {
 		return diag.FromErr(err)
 	}
-	return nil
+	return resourceItemDocumentRead(ctx, d, meta)
 }
