@@ -26,9 +26,10 @@ type Group struct {
 // ReadGroup gets an existing 1Password Group
 func (o *OnePassClient) ReadGroup(id string) (*Group, error) {
 	group := &Group{}
-	res, err := o.runCmd(opPasswordGet, GroupResource, id)
+	args := []string{opPasswordGet, GroupResource, id}
+	res, err := o.runCmd(args...)
 	if err != nil {
-		return nil, err
+		return nil, prettyError(args, res, err)
 	}
 	if err = json.Unmarshal(res, group); err != nil {
 		return nil, err
@@ -43,9 +44,10 @@ func (o *OnePassClient) ListGroupMembers(id string) ([]User, error) {
 		return users, fmt.Errorf("Must provide an identifier to list group members")
 	}
 
-	res, err := o.runCmd(opPasswordList, "users", "--"+GroupResource, id)
+	args := []string{opPasswordList, "users", "--" + GroupResource, id}
+	res, err := o.runCmd(args...)
 	if err != nil {
-		return nil, err
+		return nil, prettyError(args, res, err)
 	}
 	if err = json.Unmarshal(res, &users); err != nil {
 		return nil, err
@@ -58,7 +60,7 @@ func (o *OnePassClient) CreateGroup(v *Group) (*Group, error) {
 	args := []string{opPasswordCreate, GroupResource, v.Name}
 	res, err := o.runCmd(args...)
 	if err != nil {
-		return nil, err
+		return nil, prettyError(args, res, err)
 	}
 	if err = json.Unmarshal(res, v); err != nil {
 		return nil, err
@@ -69,14 +71,20 @@ func (o *OnePassClient) CreateGroup(v *Group) (*Group, error) {
 // CreateGroupMember adds a User to a Group
 func (o *OnePassClient) CreateGroupMember(groupID string, userID string) error {
 	args := []string{opPasswordAdd, UserResource, userID, groupID}
-	_, err := o.runCmd(args...)
+	res, err := o.runCmd(args...)
+	if err != nil {
+		return prettyError(args, res, err)
+	}
 	return err
 }
 
 // UpdateGroup updates an existing 1Password Group
 func (o *OnePassClient) UpdateGroup(id string, v *Group) error {
 	args := []string{opPasswordEdit, GroupResource, id, "--name=" + v.Name}
-	_, err := o.runCmd(args...)
+	res, err := o.runCmd(args...)
+	if err != nil {
+		return prettyError(args, res, err)
+	}
 	return err
 }
 
@@ -88,6 +96,9 @@ func (o *OnePassClient) DeleteGroup(id string) error {
 // DeleteGroupMember removes a User from a Group
 func (o *OnePassClient) DeleteGroupMember(groupID string, userID string) error {
 	args := []string{opPasswordRemove, UserResource, userID, groupID}
-	_, err := o.runCmd(args...)
+	res, err := o.runCmd(args...)
+	if err != nil {
+		return prettyError(args, res, err)
+	}
 	return err
 }

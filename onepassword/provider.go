@@ -316,11 +316,11 @@ func (o *OnePassClient) runCmd(args ...string) ([]byte, error) {
 	o.mutex.Lock()
 	cmd := o.execCommand(o.PathToOp, args...)
 	defer o.mutex.Unlock()
-	res, err := cmd.CombinedOutput()
-	if err != nil {
-		err = fmt.Errorf("some error in command %v\nError: %s\nOutput: %s", args[:len(args)-1], err, res)
-	}
-	return res, err
+	return cmd.CombinedOutput()
+}
+
+func prettyError(args []string, res []byte, err error) error {
+	return fmt.Errorf("some error in command %v\nError: %s\nOutput: %s", args[:len(args)-1], err, res)
 }
 
 func getResultID(r []byte) (string, error) {
@@ -350,6 +350,10 @@ func getIDEmail(d *schema.ResourceData) string {
 }
 
 func (o *OnePassClient) Delete(resource string, id string) error {
-	_, err := o.runCmd(opPasswordDelete, resource, id)
+	args := []string{opPasswordDelete, resource, id}
+	res, err := o.runCmd(args...)
+	if err != nil {
+		return prettyError(args, res, err)
+	}
 	return err
 }

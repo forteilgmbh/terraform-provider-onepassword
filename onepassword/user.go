@@ -28,9 +28,10 @@ type User struct {
 // This supports multiple id parameter values, including "First Last", "Email", and "UUID".
 func (o *OnePassClient) ReadUser(id string) (*User, error) {
 	user := &User{}
-	res, err := o.runCmd(opPasswordGet, UserResource, id)
+	args := []string{opPasswordGet, UserResource, id}
+	res, err := o.runCmd(args...)
 	if err != nil {
-		return nil, err
+		return nil, prettyError(args, res, err)
 	}
 	if err = json.Unmarshal(res, user); err != nil {
 		return nil, err

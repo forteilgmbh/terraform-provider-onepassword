@@ -138,7 +138,7 @@ func (o *OnePassClient) ReadItem(id string, vaultID string) (*Item, error) {
 	}
 	res, err := o.runCmd(args...)
 	if err != nil {
-		return nil, err
+		return nil, prettyError(args, res, err)
 	}
 	if err = json.Unmarshal(res, item); err != nil {
 		return nil, err
@@ -271,16 +271,17 @@ func (o *OnePassClient) CreateItem(v *Item) error {
 		if id, err := getResultID(res); err == nil {
 			v.UUID = id
 		}
+		return err
 	}
-	return err
+	return prettyError(args, res, err)
 }
 
 func (o *OnePassClient) ReadDocument(id string) (string, error) {
-	content, err := o.runCmd(
-		opPasswordGet,
-		DocumentResource,
-		id,
-	)
+	args := []string{opPasswordGet, DocumentResource, id}
+	content, err := o.runCmd(args...)
+	if err != nil {
+		return string(content), prettyError(args, content, err)
+	}
 	return string(content), err
 }
 
@@ -305,8 +306,9 @@ func (o *OnePassClient) CreateDocument(v *Item, filePath string) error {
 		if id, err := getResultID(res); err == nil {
 			v.UUID = id
 		}
+		return err
 	}
-	return err
+	return prettyError(args, res, err)
 }
 
 func resourceItemDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
