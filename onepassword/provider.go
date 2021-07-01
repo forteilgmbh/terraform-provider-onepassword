@@ -311,11 +311,19 @@ func (o *OnePassClient) SignIn() error {
 	return nil
 }
 
-func (o *OnePassClient) runCmd(args ...string) ([]byte, error) {
+func (o *OnePassClient) RunSimpleCmd(args ...string) ([]byte, error) {
+	return o.RunConfigurableCmd(args, func(cmd *exec.Cmd) error { return nil })
+}
+
+func (o *OnePassClient) RunConfigurableCmd(args []string, configureFunc func(*exec.Cmd) error) ([]byte, error) {
 	args = append(args, fmt.Sprintf("--session=%s", strings.Trim(o.Session, "\n")))
 	o.mutex.Lock()
-	cmd := o.execCommand(o.PathToOp, args...)
 	defer o.mutex.Unlock()
+	cmd := o.execCommand(o.PathToOp, args...)
+	err := configureFunc(cmd)
+	if err != nil {
+		return nil, err
+	}
 	return cmd.CombinedOutput()
 }
 
@@ -351,7 +359,7 @@ func getIDEmail(d *schema.ResourceData) string {
 
 func (o *OnePassClient) Delete(resource string, id string) error {
 	args := []string{opPasswordDelete, resource, id}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return prettyError(args, res, err)
 	}

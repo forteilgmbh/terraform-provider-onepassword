@@ -27,7 +27,7 @@ type Group struct {
 func (o *OnePassClient) ReadGroup(id string) (*Group, error) {
 	group := &Group{}
 	args := []string{opPasswordGet, GroupResource, id}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return nil, prettyError(args, res, err)
 	}
@@ -45,7 +45,7 @@ func (o *OnePassClient) ListGroupMembers(id string) ([]User, error) {
 	}
 
 	args := []string{opPasswordList, "users", "--" + GroupResource, id}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return nil, prettyError(args, res, err)
 	}
@@ -58,7 +58,7 @@ func (o *OnePassClient) ListGroupMembers(id string) ([]User, error) {
 // CreateGroup creates a new 1Password Group
 func (o *OnePassClient) CreateGroup(v *Group) (*Group, error) {
 	args := []string{opPasswordCreate, GroupResource, v.Name}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return nil, prettyError(args, res, err)
 	}
@@ -71,7 +71,7 @@ func (o *OnePassClient) CreateGroup(v *Group) (*Group, error) {
 // CreateGroupMember adds a User to a Group
 func (o *OnePassClient) CreateGroupMember(groupID string, userID string) error {
 	args := []string{opPasswordAdd, UserResource, userID, groupID}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return prettyError(args, res, err)
 	}
@@ -81,7 +81,7 @@ func (o *OnePassClient) CreateGroupMember(groupID string, userID string) error {
 // UpdateGroup updates an existing 1Password Group
 func (o *OnePassClient) UpdateGroup(id string, v *Group) error {
 	args := []string{opPasswordEdit, GroupResource, id, "--name=" + v.Name}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return prettyError(args, res, err)
 	}
@@ -96,7 +96,7 @@ func (o *OnePassClient) DeleteGroup(id string) error {
 // DeleteGroupMember removes a User from a Group
 func (o *OnePassClient) DeleteGroupMember(groupID string, userID string) error {
 	args := []string{opPasswordRemove, UserResource, userID, groupID}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return prettyError(args, res, err)
 	}

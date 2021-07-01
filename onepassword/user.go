@@ -29,7 +29,7 @@ type User struct {
 func (o *OnePassClient) ReadUser(id string) (*User, error) {
 	user := &User{}
 	args := []string{opPasswordGet, UserResource, id}
-	res, err := o.runCmd(args...)
+	res, err := o.RunSimpleCmd(args...)
 	if err != nil {
 		return nil, prettyError(args, res, err)
 	}
