@@ -16,6 +16,8 @@ import (
 const ItemResource = "item"
 const DocumentResource = "document"
 
+const Stdin = "-"
+
 type SectionFieldType string
 type FieldType string
 type Category string
@@ -82,10 +84,11 @@ type Item struct {
 }
 
 type Details struct {
-	Notes    string    `json:"notesPlain"`
-	Password string    `json:"password"`
-	Fields   []Field   `json:"fields"`
-	Sections []Section `json:"sections"`
+	Notes              string             `json:"notesPlain"`
+	Password           string             `json:"password"`
+	Fields             []Field            `json:"fields"`
+	Sections           []Section          `json:"sections"`
+	DocumentAttributes DocumentAttributes `json:"documentAttributes"`
 }
 
 type Section struct {
@@ -121,6 +124,11 @@ type Field struct {
 	Designation string    `json:"designation"`
 	Name        string    `json:"name"`
 	Value       string    `json:"value"`
+}
+
+type DocumentAttributes struct {
+	FileName string `json:"fileName"`
+	// omitted other fields: add them here if necessary
 }
 
 type Overview struct {
@@ -291,21 +299,22 @@ func (o *OnePassClient) CreateItem(v *Item) error {
 	return prettyError(args, res, err)
 }
 
-func (o *OnePassClient) ReadDocument(id string) (string, error) {
+func (o *OnePassClient) ReadDocument(id string) ([]byte, error) {
 	args := []string{opPasswordGet, DocumentResource, id}
 	content, err := o.RunSimpleCmd(args...)
 	if err != nil {
-		return string(content), prettyError(args, content, err)
+		return content, prettyError(args, content, err)
 	}
-	return string(content), err
+	return content, err
 }
 
-func (o *OnePassClient) CreateDocument(v *Item, filePath string) error {
+func (o *OnePassClient) CreateDocument(v *Item, content []byte) error {
 	args := []string{
 		opPasswordCreate,
 		DocumentResource,
-		filePath,
+		Stdin,
 		fmt.Sprintf("--title=%s", v.Overview.Title),
+		fmt.Sprintf("--filename=%s", v.Details.DocumentAttributes.FileName),
 	}
 
 	if len(v.Overview.Tags) > 0 {
@@ -316,7 +325,7 @@ func (o *OnePassClient) CreateDocument(v *Item, filePath string) error {
 		args = append(args, fmt.Sprintf("--vault=%s", v.Vault))
 	}
 
-	res, err := o.RunSimpleCmd(args...)
+	res, err := o.RunStdinCmd(content, args...)
 	if err == nil {
 		if id, err := getResultID(res); err == nil {
 			v.UUID = id

@@ -315,6 +315,18 @@ func (o *OnePassClient) RunSimpleCmd(args ...string) ([]byte, error) {
 	return o.RunConfigurableCmd(args, func(cmd *exec.Cmd) error { return nil })
 }
 
+func (o *OnePassClient) RunStdinCmd(b []byte, args ...string) ([]byte, error) {
+	return o.RunConfigurableCmd(args, func(cmd *exec.Cmd) error {
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			return err
+		}
+		defer stdin.Close()
+		_, err = stdin.Write(b)
+		return err
+	})
+}
+
 func (o *OnePassClient) RunConfigurableCmd(args []string, configureFunc func(*exec.Cmd) error) ([]byte, error) {
 	args = append(args, fmt.Sprintf("--session=%s", strings.Trim(o.Session, "\n")))
 	o.mutex.Lock()
