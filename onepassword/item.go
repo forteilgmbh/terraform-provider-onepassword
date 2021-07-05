@@ -84,11 +84,11 @@ type Item struct {
 }
 
 type Details struct {
-	Notes              string             `json:"notesPlain"`
-	Password           string             `json:"password"`
-	Fields             []Field            `json:"fields"`
-	Sections           []Section          `json:"sections"`
-	DocumentAttributes DocumentAttributes `json:"documentAttributes"`
+	Notes              string              `json:"notesPlain"`
+	Password           string              `json:"password"`
+	Fields             []Field             `json:"fields"`
+	Sections           []Section           `json:"sections"`
+	DocumentAttributes *DocumentAttributes `json:"documentAttributes,omitempty"`
 }
 
 type Section struct {
@@ -314,7 +314,7 @@ func (o *OnePassClient) CreateDocument(v *Item, content []byte) error {
 		DocumentResource,
 		Stdin,
 		fmt.Sprintf("--title=%s", v.Overview.Title),
-		fmt.Sprintf("--filename=%s", v.Details.DocumentAttributes.FileName),
+		fmt.Sprintf("--filename=%s", (*v.Details.DocumentAttributes).FileName),
 	}
 
 	if len(v.Overview.Tags) > 0 {

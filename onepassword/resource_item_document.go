@@ -110,7 +110,7 @@ func resourceItemDocumentRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("vault", v.Vault); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("filename", v.Details.DocumentAttributes.FileName); err != nil {
+	if err := d.Set("filename", (*v.Details.DocumentAttributes).FileName); err != nil {
 		return diag.FromErr(err)
 	}
 	if err := d.Set("archived", v.Trashed == IsTrashed); err != nil {
@@ -161,7 +161,7 @@ func resourceItemDocumentCreate(ctx context.Context, d *schema.ResourceData, met
 			Tags:  ParseTags(d),
 		},
 		Details: Details{
-			DocumentAttributes: DocumentAttributes{
+			DocumentAttributes: &DocumentAttributes{
 				FileName: filename,
 			},
 		},
