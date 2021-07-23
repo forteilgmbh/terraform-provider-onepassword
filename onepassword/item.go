@@ -314,7 +314,7 @@ func (o *OnePassClient) CreateDocument(v *Item, content []byte) error {
 		DocumentResource,
 		Stdin,
 		fmt.Sprintf("--title=%s", v.Overview.Title),
-		fmt.Sprintf("--filename=%s", (*v.Details.DocumentAttributes).FileName),
+		fmt.Sprintf("--file-name=%s", (*v.Details.DocumentAttributes).FileName),
 	}
 
 	if len(v.Overview.Tags) > 0 {
